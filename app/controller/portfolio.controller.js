@@ -1,4 +1,4 @@
-const { getCurrentPrice } = require("../helpers");
+const { getCurrentPrice } = require("../../helpers");
 const { SQLGetPortfolio } = require("../model/portfolio");
 const { SQLGetAllSecurities } = require("../model/securities");
 

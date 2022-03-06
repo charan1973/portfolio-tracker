@@ -1,5 +1,7 @@
 const { SQLGetAllSecurities } = require("../model/securities");
 const { SQLCreateTrade, SQLRemoveTrade, SQLGetTradesWithSecurities, SQLUpdateTrade } = require("../model/trade");
+const { validateSchema } = require("../../validator");
+const { createTradeSchema, updateTradeSchema } = require("../../validator/schema/trade.schema");
 
 const createTrade = async (req, res) => {
   // #swagger.tags = ['Trade']
@@ -34,7 +36,10 @@ const createTrade = async (req, res) => {
       quantity
   } = req.body;
 
+  
   try {
+    validateSchema(createTradeSchema, req.body);
+
     await SQLCreateTrade({
       portfolioId,
       tradeType,
@@ -138,6 +143,8 @@ const updateTrade = async (req, res) => {
   } = req.body;
 
   try {
+    validateSchema(updateTradeSchema, req.body);
+
     await SQLUpdateTrade({
       portfolioId,
       tradeId,

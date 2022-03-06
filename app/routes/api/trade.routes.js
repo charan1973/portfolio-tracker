@@ -1,11 +1,11 @@
+const router = require("express").Router();
+
 const {
   createTrade,
   removeTrade,
   getTrades,
   updateTrade
 } = require("../../controller/trade.controller");
-
-const router = require("express").Router();
 
 router.post("/", createTrade);
 
