@@ -6,10 +6,8 @@
     "description": ""
   },
   "host": "localhost:3000",
-  "basePath": "/",
-  "schemes": [
-    "http"
-  ],
+  "basePath": "/api/",
+  "schemes": "http",
   "paths": {
     "/portfolio/{portfolio_id}": {
       "get": {
