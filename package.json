@@ -1,0 +1,25 @@
+{
+  "name": "portfolio-tracking",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./config/swagger.js; node ./bin/www;",
+    "dev": "node ./config/swagger.js; nodemon ./bin/www",
+    "swagger-autogen": "node ./config/swagger.js"
+  },
+  "dependencies": {
+    "ajv": "^8.10.0",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^16.0.0",
+    "express": "~4.16.1",
+    "morgan": "~1.9.1",
+    "pg": "^8.7.3",
+    "pg-pool": "^3.5.1",
+    "swagger-autogen": "^2.19.0",
+    "swagger-ui-express": "^4.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
