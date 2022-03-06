@@ -2,6 +2,7 @@ const { SQLCreateTrade } = require('../../model/trade');
 
 const { validateSchema } = require('../../../validator');
 const { createTradeSchema } = require('../../../validator/schema/trade.schema');
+const { getCurrentPrice } = require('../../../helpers');
 
 const createTrade = async (req, res) => {
   // #swagger.tags = ['Trade']
@@ -76,7 +77,7 @@ const createTrade = async (req, res) => {
       portfolioId,
       tradeType,
       tickerSymbol,
-      currentBuyPrice,
+      currentBuyPrice: currentBuyPrice || getCurrentPrice(tickerSymbol),
       quantity,
     });
 
