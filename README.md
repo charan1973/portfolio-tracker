@@ -1,6 +1,5 @@
 # Portfolio Tracker
 
-
 A simple porfolio tracker app which manages portfolio, securities and trades. Hosted on Heroku and uses postgresql add-on provided by Heroku.
 
 ## Tech Stack
@@ -47,6 +46,8 @@ Run migration(no migration tool setup, so running `migrations/portfolio-up.sql` 
 Run seeds(no seeds tool setup, run the `seeds/portfolio.sql`)
 
 Access the app documentation from `/doc`: [REST documentation](https://portfolio-tracker-sc.herokuapp.com/doc)
+
+**NOTE**: App is hosted on Heroku free tier. Heroku forces the service to sleep if 30 minutes of inactivity. Please wait for the app to boot on first request.
 
 ## **Usage:**
 App already has created a sample portfolio with id: `46e9d384-09e2-4135-9c9d-c024e5567a50`
