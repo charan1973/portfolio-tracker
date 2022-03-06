@@ -26,7 +26,7 @@ CREATE TABLE trades (
     trade_type trade_type_enum,
     ticker_symbol VARCHAR(10),
     previous_avg_buy DOUBLE PRECISION,
-    current_buy_price DOUBLE PRECISION,
+    current_price DOUBLE PRECISION,
     quantity SERIAL,
     deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

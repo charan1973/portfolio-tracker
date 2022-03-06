@@ -32,7 +32,7 @@ const updateTrade = async (req, res) => {
             description: "type of the trade",
             enum: ["BUY", "SELL"]
           },
-          current_buy_price: {
+          current_price: {
             type: "number",
             description: "the buy price for the ticker symbol"
           },
@@ -72,7 +72,7 @@ const updateTrade = async (req, res) => {
 
   const {
     trade_type: tradeType,
-    current_buy_price: currentBuyPrice,
+    current_price: currentPrice,
     quantity,
   } = req.body;
 
@@ -83,7 +83,7 @@ const updateTrade = async (req, res) => {
       portfolioId,
       tradeId,
       tradeType,
-      currentBuyPrice,
+      currentPrice,
       quantity,
     });
 

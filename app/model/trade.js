@@ -27,8 +27,11 @@ const currentAverageBuyPrice = ({
     if (quantity === 0) {
       price = 0;
     } else {
-      price = ((oldPrice * oldPriceQuantity) - (newPrice * newPriceQuantity)) / quantity;
+      price = oldPrice;
     }
+    // else {
+    //   price = ((oldPrice * oldPriceQuantity) - (newPrice * newPriceQuantity)) / quantity;
+    // }
 
     if (price < 0) throw Error('Value goes negative');
   }
@@ -63,7 +66,7 @@ const getSecurityQuery = (portfolioId, tickerSymbol) => {
  */
 const getTradeQuery = (tradeId, portfolioId) => {
   const query = `
-    SELECT trade_type, ticker_symbol, previous_avg_buy, current_buy_price, quantity
+    SELECT trade_type, ticker_symbol, previous_avg_buy, current_price, quantity
     FROM trades
     WHERE id = $1 AND portfolio_id = $2 AND deleted = FALSE;
   `;
@@ -77,7 +80,7 @@ const getTradeQuery = (tradeId, portfolioId) => {
  * @param {String} param.portfolioId porfolio id against which the trade has to be created
  * @param {String} param.tradeType type of trade that is being made(BUY or SELL)
  * @param {String} param.tickerSymbol ticker symbol for which the trade is being made
- * @param {Number} param.currentBuyPrice the buy price of the share
+ * @param {Number} param.currentPrice the buy price of the share
  * @param {Number} param.quantity number of shares being bought
  * @returns {*} returns nothing if passed else throws error
  */
@@ -85,7 +88,7 @@ TRADE.SQLCreateTrade = async ({
   portfolioId,
   tradeType,
   tickerSymbol,
-  currentBuyPrice,
+  currentPrice,
   quantity,
 }) => {
   const client = await pool.connect();
@@ -104,7 +107,7 @@ TRADE.SQLCreateTrade = async ({
         trade_type,
         ticker_symbol,
         previous_avg_buy,
-        current_buy_price,
+        current_price,
         quantity
       )
       VALUES ($1, $2, $3, $4, $5, $6);
@@ -114,7 +117,7 @@ TRADE.SQLCreateTrade = async ({
       tradeType,
       tickerSymbol,
       security.average_buy_price,
-      currentBuyPrice,
+      currentPrice,
       quantity,
     ];
     await client.query(tradeEntryQuery, tradeEntryValues); // create trade entry
@@ -126,7 +129,7 @@ TRADE.SQLCreateTrade = async ({
       DO UPDATE SET average_buy_price = $3, shares = $4, updated_at = CURRENT_TIMESTAMP;
     `;
     const newAveragePrice = currentAverageBuyPrice({
-      newPrice: currentBuyPrice,
+      newPrice: currentPrice,
       newPriceQuantity: quantity,
       oldPrice: security.average_buy_price,
       oldPriceQuantity: security.shares,
@@ -157,7 +160,10 @@ TRADE.SQLCreateTrade = async ({
  * @returns {Object} price and quantity that was previous before the remove trade
  */
 const revertPrice = ({
-  tradeQuantity, shareQuantity, prevPrice, tradeType,
+  tradeQuantity,
+  shareQuantity,
+  prevPrice,
+  tradeType,
 }) => {
   let price;
   let quantity;
@@ -168,13 +174,14 @@ const revertPrice = ({
     if (quantity === 0) {
       price = 0;
     } else {
-      price = prevPrice * quantity;
+      price = prevPrice;
     }
     if (price < 0) throw Error('Value goes negative');
   } else if (tradeType === 'SELL') {
     quantity = shareQuantity + tradeQuantity;
+    if (quantity < 0) throw Error('Value goes negative');
 
-    price = (prevPrice * quantity) / quantity;
+    price = prevPrice;
   }
 
   return {
@@ -209,7 +216,7 @@ TRADE.SQLRemoveTrade = async ({
       .query(...getSecurityQuery(portfolioId, tradeData.ticker_symbol)); // get security to update
 
     const updatedAveragePrice = revertPrice({ // get the old average buy price
-      tradePrice: tradeData.current_buy_price,
+      tradePrice: tradeData.current_price,
       tradeQuantity: tradeData.quantity,
       avgBuyPrice: securityData.average_buy_price,
       shareQuantity: securityData.shares,
@@ -252,7 +259,7 @@ TRADE.SQLRemoveTrade = async ({
  * @param {String} param.portfolioId porfolio id that owns the trade
  * @param {String} param.tradeId trade that needs to be updates
  * @param {String} param.tradeType trade type to be updated to
- * @param {Number} param.currentBuyPrice updating the current buy price
+ * @param {Number} param.currentPrice updating the current buy price
  * @param {Number} param.quantity quantity to be updated to
  * @returns {*} returns nothing if passed else throws error
  */
@@ -260,7 +267,7 @@ TRADE.SQLUpdateTrade = async ({
   portfolioId,
   tradeId,
   tradeType,
-  currentBuyPrice,
+  currentPrice,
   quantity,
 }) => {
   const client = await pool.connect();
@@ -277,14 +284,14 @@ TRADE.SQLUpdateTrade = async ({
 
     const newTradeObj = { // create updated trade obj
       ...(tradeType !== tradeData.trade_type && { tradeType }),
-      ...(currentBuyPrice !== tradeData.current_buy_price && { currentBuyPrice }),
+      ...(currentPrice !== tradeData.current_price && { currentPrice }),
       ...(quantity !== tradeData.quantity && { quantity }),
     };
 
     const updateTradeQuery = `
       UPDATE trades
       SET ${newTradeObj.tradeType ? `trade_type = '${newTradeObj.tradeType}', ` : ''}
-      ${newTradeObj.currentBuyPrice ? `current_buy_price = ${newTradeObj.currentBuyPrice}, ` : ''}
+      ${newTradeObj.currentPrice ? `current_price = ${newTradeObj.currentPrice}, ` : ''}
       ${newTradeObj.quantity ? `quantity = ${newTradeObj.quantity}, ` : ''}
       updated_at = CURRENT_TIMESTAMP
       WHERE id = $1 AND portfolio_id = $2;
@@ -297,7 +304,7 @@ TRADE.SQLUpdateTrade = async ({
       .query(...getSecurityQuery(portfolioId, tradeData.ticker_symbol)); // get security to update
 
     const updatedAveragePrice = revertPrice({ // revert the trade to old price
-      tradePrice: tradeData.current_buy_price,
+      tradePrice: tradeData.current_price,
       tradeQuantity: tradeData.quantity,
       avgBuyPrice: securityData.average_buy_price,
       shareQuantity: securityData.shares,
@@ -306,7 +313,7 @@ TRADE.SQLUpdateTrade = async ({
     });
 
     const newAverageBuyPriceParam = {
-      newPrice: typeof newTradeObj.currentBuyPrice === 'number' ? newTradeObj.currentBuyPrice : tradeData.current_buy_price,
+      newPrice: typeof newTradeObj.currentPrice === 'number' ? newTradeObj.currentPrice : tradeData.current_price,
       newPriceQuantity: typeof newTradeObj.quantity === 'number' ? newTradeObj.quantity : tradeData.quantity,
       oldPrice: updatedAveragePrice.price,
       oldPriceQuantity: updatedAveragePrice.quantity,
@@ -347,7 +354,7 @@ TRADE.SQLUpdateTrade = async ({
  */
 TRADE.SQLGetTradesWithSecurities = async ({ portfolioId }) => {
   const query = `
-    SELECT id, trade_type, ticker_symbol, current_buy_price AS buy_price, quantity
+    SELECT id, trade_type, ticker_symbol, current_price AS trade_price, quantity
     FROM trades
     WHERE portfolio_id = $1 AND deleted = FALSE;
   `;

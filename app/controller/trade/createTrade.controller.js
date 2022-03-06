@@ -28,7 +28,7 @@ const createTrade = async (req, res) => {
             type: "string",
             description: "ticker symbol for the trade"
           },
-          current_buy_price: {
+          current_price: {
             type: "number",
             description: "the buy price for the ticker symbol"
           },
@@ -66,7 +66,7 @@ const createTrade = async (req, res) => {
     portfolio_id: portfolioId,
     trade_type: tradeType,
     ticker_symbol: tickerSymbol,
-    current_buy_price: currentBuyPrice,
+    current_price: currentPrice,
     quantity,
   } = req.body;
 
@@ -77,7 +77,7 @@ const createTrade = async (req, res) => {
       portfolioId,
       tradeType,
       tickerSymbol,
-      currentBuyPrice: currentBuyPrice || getCurrentPrice(tickerSymbol),
+      currentPrice: currentPrice || getCurrentPrice(tickerSymbol),
       quantity,
     });
 
