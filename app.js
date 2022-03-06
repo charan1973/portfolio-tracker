@@ -15,15 +15,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use((req, res, next) => {
-    const authorization = req.headers["authorization"];
-
-    if (authorization) {
-        req.portfolio_id = authorization;
-    }
-    next();
-});
-
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 app.use('/api', indexRouter);
 

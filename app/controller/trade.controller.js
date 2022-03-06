@@ -6,6 +6,39 @@ const { createTradeSchema, updateTradeSchema } = require("../../validator/schema
 const createTrade = async (req, res) => {
   // #swagger.tags = ['Trade']
   // #swagger.description = 'Endpoint to create a trade'
+  /* #swagger.parameters["new_trade"] = {
+    in: "body",
+    description: "object for creating new trade",
+    required: true,
+    schema: {
+      type: "object",
+      properties: {
+        portfolio_id: {
+          type: "string",
+          format: "uuid",
+          description: "portfolio id against which the trade needs to be created"
+        },
+        trade_type: {
+          type: "string",
+          description: "type of the trade",
+          enum: ["BUY", "SELL"]
+        },
+        ticker_symbol: {
+          type: "string",
+          description: "ticker symbol for the trade"
+        },
+        current_buy_price: {
+          type: "number",
+          description: "the buy price for the ticker symbol"
+        },
+        quantity: {
+          type: "number",
+          description: "number of shares bought"
+        }
+      }
+    }
+  } 
+  */
   /* #swagger.responses[200] = {
     schema: {
       type: "object",
@@ -62,7 +95,22 @@ const createTrade = async (req, res) => {
 const removeTrade = async (req, res) => {
   // #swagger.tags = ['Trade']
   // #swagger.description = 'Endpoint to remove a trade'
-  /* #swagger.responses[200] = {
+  /*
+  #swagger.parameters["portfolio_id"] = {
+    description: "portfolio id from where the trade should be removed",
+    required: true,
+    schema: {
+      type: "string"
+    }
+  }
+  #swagger.parameters["trade_id"] = {
+    description: "trade id of trade which should be removed",
+    required: true,
+    schema: {
+      type: "string"
+    }
+  }
+  #swagger.responses[200] = {
     schema: {
       type: "object",
       properties: {
@@ -72,8 +120,8 @@ const removeTrade = async (req, res) => {
         }
       }
     }
-  } */
-  /* #swagger.responses[400] = {
+  }
+  #swagger.responses[400] = {
     schema: {
       type: "object",
       properties: {
@@ -83,7 +131,9 @@ const removeTrade = async (req, res) => {
         }
       }
     }
-  } */
+  }
+  */
+
   const {
     portfolio_id: portfolioId,
     trade_id: tradeId
@@ -109,7 +159,45 @@ const removeTrade = async (req, res) => {
 const updateTrade = async (req, res) => {
   // #swagger.tags = ['Trade']
   // #swagger.description = 'Endpoint to update a trade'
-  /* #swagger.responses[200] = {
+  /*
+  #swagger.parameters["portfolio_id"] = {
+    description: "portfolio id from where the trade should be removed",
+    required: true,
+    schema: {
+      type: "string"
+    }
+  }
+  #swagger.parameters["trade_id"] = {
+    description: "trade id of trade which should be removed",
+    required: true,
+    schema: {
+      type: "string"
+    }
+  }
+  #swagger.parameters["update_trade"] = {
+    in: "body",
+    description: "object for updating existing trade",
+    required: true,
+    schema: {
+      type: "object",
+      properties: {
+        trade_type: {
+          type: "string",
+          description: "type of the trade",
+          enum: ["BUY", "SELL"]
+        },
+        current_buy_price: {
+          type: "number",
+          description: "the buy price for the ticker symbol"
+        },
+        quantity: {
+          type: "number",
+          description: "number of shares bought"
+        }
+      }
+    }
+  }
+  #swagger.responses[200] = {
     schema: {
       type: "object",
       properties: {
@@ -119,8 +207,8 @@ const updateTrade = async (req, res) => {
         }
       }
     }
-  } */
-  /* #swagger.responses[400] = {
+  }
+  #swagger.responses[400] = {
     schema: {
       type: "object",
       properties: {

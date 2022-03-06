@@ -262,13 +262,100 @@
         "description": "Endpoint to create a trade",
         "parameters": [
           {
-            "name": "body",
+            "name": "new_trade",
             "in": "body",
+            "description": "object for creating new trade",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "schema": {
-                  "example": "any"
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "portfolio_id": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "format": {
+                          "type": "string",
+                          "example": "uuid"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "portfolio id against which the trade needs to be created"
+                        }
+                      }
+                    },
+                    "trade_type": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "type of the trade"
+                        },
+                        "enum": {
+                          "type": "array",
+                          "example": [
+                            "BUY",
+                            "SELL"
+                          ],
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "ticker_symbol": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "ticker symbol for the trade"
+                        }
+                      }
+                    },
+                    "current_buy_price": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "number"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "the buy price for the ticker symbol"
+                        }
+                      }
+                    },
+                    "quantity": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "number"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "number of shares bought"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -558,22 +645,87 @@
             "name": "portfolio_id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "portfolio id from where the trade should be removed",
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "trade_id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "trade id of trade which should be removed",
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "name": "body",
+            "name": "update_trade",
             "in": "body",
+            "description": "object for updating existing trade",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "schema": {
-                  "example": "any"
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "trade_type": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "type of the trade"
+                        },
+                        "enum": {
+                          "type": "array",
+                          "example": [
+                            "BUY",
+                            "SELL"
+                          ],
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "current_buy_price": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "number"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "the buy price for the ticker symbol"
+                        }
+                      }
+                    },
+                    "quantity": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "number"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "number of shares bought"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -658,13 +810,21 @@
             "name": "portfolio_id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "portfolio id from where the trade should be removed",
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "trade_id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "trade id of trade which should be removed",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
