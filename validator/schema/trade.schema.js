@@ -18,10 +18,12 @@ const createTradeSchema = {
       type: 'number',
     },
   },
+  required: ['portfolio_id', 'trade_type', 'ticker_symbol', 'quantity'],
 };
 
 const updateTradeSchema = {
   type: 'object',
+  minProperties: 1,
   properties: {
     trade_type: {
       type: 'string',
