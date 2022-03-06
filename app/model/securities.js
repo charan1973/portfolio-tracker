@@ -1,4 +1,4 @@
-const pool = require("../config/database");
+const pool = require('../../config/database');
 
 const SECURITY = {};
 
@@ -13,12 +13,12 @@ SECURITY.SQLGetAllSecurities = ({ portfolioId }) => {
 
   return new Promise((resolve, reject) => {
     pool.query(query, values, (err, res) => {
-        if (err) {
-            return reject(err);
-        }
-        const { rows: securities } = res;
-        return resolve(securities);
-    })
+      if (err) {
+        return reject(err);
+      }
+      const { rows: securities } = res;
+      return resolve(securities);
+    });
   });
 };
 

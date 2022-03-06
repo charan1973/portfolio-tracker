@@ -3,14 +3,14 @@
 
 A simple porfolio tracker app which manages portfolio, securities and trades. Hosted on Heroku and uses postgresql add-on provided by Heroku.
 
-## **Tech Stack**
+## Tech Stack
 - Nodejs/Express
 - PostgreSQL
 - node-pg and pg-pool (db driver and connection pooling)
 - ajv (for schema validation)
 - Swagger auto gen (for documentation)
 
-## **Installation**
+## Installation
 - Step 1:
 Clone the repo
 
