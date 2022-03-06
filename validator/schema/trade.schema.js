@@ -1,42 +1,42 @@
 const createTradeSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     portfolio_id: {
-      type: "string",
+      type: 'string',
     },
     trade_type: {
-      type: "string",
-      enum: ["BUY", "SELL"]
+      type: 'string',
+      enum: ['BUY', 'SELL'],
     },
     ticker_symbol: {
-      type: "string",
+      type: 'string',
     },
     current_buy_price: {
-      type: "number"
+      type: 'number',
     },
     quantity: {
-      type: "number"
-    }
-  }
+      type: 'number',
+    },
+  },
 };
 
 const updateTradeSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     trade_type: {
-      type: "string",
-      enum: ["BUY", "SELL"]
+      type: 'string',
+      enum: ['BUY', 'SELL'],
     },
     current_buy_price: {
-      type: "number"
+      type: 'number',
     },
     quantity: {
-      type: "number"
-    }
-  }
+      type: 'number',
+    },
+  },
 };
 
 module.exports = {
   createTradeSchema,
-  updateTradeSchema
+  updateTradeSchema,
 };

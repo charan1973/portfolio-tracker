@@ -1,26 +1,28 @@
-const pool = require("../../config/database");
+const pool = require('../../config/database');
 
 const TRADE = {};
 
 /**
  * Getting new average buy price for security
- * @param {Object} param.newPrice The trade price 
- * @param {Object} param.newPriceQuantity The trade quantity for the price 
- * @param {Object} param.oldPrice Previous average buy price of the security 
- * @param {Object} param.oldPrice Shares available for the security 
- * @param {Object} param.tradeType Type of the trade 
+ * @param {Object} param.newPrice The trade price
+ * @param {Object} param.newPriceQuantity The trade quantity for the price
+ * @param {Object} param.oldPrice Previous average buy price of the security
+ * @param {Object} param.oldPrice Shares available for the security
+ * @param {Object} param.tradeType Type of the trade
  * @returns {Object} price and quantity with the new trade
  */
-const currentAverageBuyPrice = ({ newPrice, newPriceQuantity, oldPrice, oldPriceQuantity, tradeType }) => {
+const currentAverageBuyPrice = ({
+  newPrice, newPriceQuantity, oldPrice, oldPriceQuantity, tradeType,
+}) => {
   let price;
   let quantity;
-  if (tradeType === "BUY") {
+  if (tradeType === 'BUY') {
     quantity = (oldPriceQuantity + newPriceQuantity);
     price = ((newPrice * newPriceQuantity) + (oldPrice * oldPriceQuantity)) / quantity;
-  } else if (tradeType === "SELL") {
+  } else if (tradeType === 'SELL') {
     quantity = oldPriceQuantity - newPriceQuantity;
-    
-    if (quantity < 0) throw Error("Value goes negative");
+
+    if (quantity < 0) throw Error('Value goes negative');
 
     if (quantity === 0) {
       price = 0;
@@ -28,11 +30,11 @@ const currentAverageBuyPrice = ({ newPrice, newPriceQuantity, oldPrice, oldPrice
       price = ((oldPrice * oldPriceQuantity) - (newPrice * newPriceQuantity)) / quantity;
     }
 
-    if (price < 0) throw Error("Value goes negative");
+    if (price < 0) throw Error('Value goes negative');
   }
   return {
     price,
-    quantity
+    quantity,
   };
 };
 
@@ -84,16 +86,17 @@ TRADE.SQLCreateTrade = async ({
   tradeType,
   tickerSymbol,
   currentBuyPrice,
-  quantity
+  quantity,
 }) => {
   const client = await pool.connect();
   try {
-    await client.query("BEGIN"); // begin transaction
-    
-    const { rows } = await client.query(...getSecurityQuery(portfolioId, tickerSymbol)); // get the security if it exists
+    await client.query('BEGIN'); // begin transaction
+
+    const { rows } = await client
+      .query(...getSecurityQuery(portfolioId, tickerSymbol)); // get the security if it exists
     const security = {
       average_buy_price: rows[0]?.average_buy_price || 0,
-      shares: rows[0]?.shares || 0
+      shares: rows[0]?.shares || 0,
     };
     const tradeEntryQuery = `
       INSERT INTO trades(
@@ -106,9 +109,16 @@ TRADE.SQLCreateTrade = async ({
       )
       VALUES ($1, $2, $3, $4, $5, $6);
     `;
-    const tradeEntryValues = [portfolioId, tradeType, tickerSymbol, security.average_buy_price, currentBuyPrice, quantity];
+    const tradeEntryValues = [
+      portfolioId,
+      tradeType,
+      tickerSymbol,
+      security.average_buy_price,
+      currentBuyPrice,
+      quantity,
+    ];
     await client.query(tradeEntryQuery, tradeEntryValues); // create trade entry
-    
+
     const upsertSecurityQuery = `
       INSERT INTO securities(portfolio_id, ticker_symbol, average_buy_price, shares)
       VALUES ($1, $2, $3, $4)
@@ -120,13 +130,18 @@ TRADE.SQLCreateTrade = async ({
       newPriceQuantity: quantity,
       oldPrice: security.average_buy_price,
       oldPriceQuantity: security.shares,
-      tradeType
+      tradeType,
     });
-    const upsertSecurityValues = [portfolioId, tickerSymbol, newAveragePrice.price, newAveragePrice.quantity];
+    const upsertSecurityValues = [
+      portfolioId,
+      tickerSymbol,
+      newAveragePrice.price,
+      newAveragePrice.quantity,
+    ];
     await client.query(upsertSecurityQuery, upsertSecurityValues); // upsert security
-    await client.query("COMMIT"); // commit to db
+    await client.query('COMMIT'); // commit to db
   } catch (error) {
-    await client.query("ROLLBACK"); // rollback on failure
+    await client.query('ROLLBACK'); // rollback on failure
     throw error;
   } finally {
     client.release(); // release after rollback or commit
@@ -135,26 +150,28 @@ TRADE.SQLCreateTrade = async ({
 
 /**
  * Revert the price back to previous average price
- * @param {Number} param.tradeQuantity quantity that needs to be removed(from the trade) 
- * @param {Number} param.shareQuantity quantity that exists in the security at the moment 
- * @param {Number} param.prevPrice previous average buy price of the security(from trade object) 
- * @param {Number} param.tradeType type of trade(to remove or add based on buy or sell) 
+ * @param {Number} param.tradeQuantity quantity that needs to be removed(from the trade)
+ * @param {Number} param.shareQuantity quantity that exists in the security at the moment
+ * @param {Number} param.prevPrice previous average buy price of the security(from trade object)
+ * @param {Number} param.tradeType type of trade(to remove or add based on buy or sell)
  * @returns {Object} price and quantity that was previous before the remove trade
  */
-const revertPrice = ({ tradeQuantity, shareQuantity, prevPrice, tradeType }) => {
+const revertPrice = ({
+  tradeQuantity, shareQuantity, prevPrice, tradeType,
+}) => {
   let price;
   let quantity;
 
-  if (tradeType === "BUY") {
+  if (tradeType === 'BUY') {
     quantity = shareQuantity - tradeQuantity;
-    if (quantity < 0) throw Error("Value goes negative");
+    if (quantity < 0) throw Error('Value goes negative');
     if (quantity === 0) {
       price = 0;
     } else {
       price = prevPrice * quantity;
     }
-    if (price < 0) throw Error("Value goes negative");
-  } else if (tradeType === "SELL") {
+    if (price < 0) throw Error('Value goes negative');
+  } else if (tradeType === 'SELL') {
     quantity = shareQuantity + tradeQuantity;
 
     price = (prevPrice * quantity) / quantity;
@@ -162,7 +179,7 @@ const revertPrice = ({ tradeQuantity, shareQuantity, prevPrice, tradeType }) => 
 
   return {
     price,
-    quantity
+    quantity,
   };
 };
 
@@ -174,22 +191,22 @@ const revertPrice = ({ tradeQuantity, shareQuantity, prevPrice, tradeType }) => 
  */
 TRADE.SQLRemoveTrade = async ({
   tradeId,
-  portfolioId
+  portfolioId,
 }) => {
   const client = await pool.connect();
   try {
-    await client.query("BEGIN"); // begin transaction
+    await client.query('BEGIN'); // begin transaction
 
-    let { rows: tradeData } = await client.query(...getTradeQuery(tradeId, portfolioId)); // get the trade to remove
-    tradeData = tradeData[0];
+    const { rows: [tradeData] } = await client
+      .query(...getTradeQuery(tradeId, portfolioId)); // get the trade to remove
 
     if (!tradeData) {
-      client.query("ROLLBACK");
+      client.query('ROLLBACK');
       throw new Error("Trade doesn't exist");
     }
 
-    let { rows: securityData } = await client.query(...getSecurityQuery(portfolioId, tradeData.ticker_symbol)); // get security to update
-    securityData = securityData[0];
+    const { rows: [securityData] } = await client
+      .query(...getSecurityQuery(portfolioId, tradeData.ticker_symbol)); // get security to update
 
     const updatedAveragePrice = revertPrice({ // get the old average buy price
       tradePrice: tradeData.current_buy_price,
@@ -197,7 +214,7 @@ TRADE.SQLRemoveTrade = async ({
       avgBuyPrice: securityData.average_buy_price,
       shareQuantity: securityData.shares,
       prevPrice: tradeData.previous_avg_buy,
-      tradeType: tradeData.trade_type
+      tradeType: tradeData.trade_type,
     });
 
     const removeTradeQuery = `
@@ -214,12 +231,17 @@ TRADE.SQLRemoveTrade = async ({
       SET average_buy_price = $1, shares = $2, updated_at = CURRENT_TIMESTAMP
       WHERE portfolio_id = $3 AND ticker_symbol = $4;
     `;
-    const revertSecurityValues = [updatedAveragePrice.price, updatedAveragePrice.quantity, portfolioId, tradeData.ticker_symbol];
+    const revertSecurityValues = [
+      updatedAveragePrice.price,
+      updatedAveragePrice.quantity,
+      portfolioId,
+      tradeData.ticker_symbol,
+    ];
 
     await client.query(revertSecurityQuery, revertSecurityValues); // update security
-    await client.query("COMMIT"); // commit
+    await client.query('COMMIT'); // commit
   } catch (error) {
-    await client.query("ROLLBACK"); // rollback on failure
+    await client.query('ROLLBACK'); // rollback on failure
     throw error;
   } finally {
     client.release(); // release client
@@ -239,31 +261,31 @@ TRADE.SQLUpdateTrade = async ({
   tradeId,
   tradeType,
   currentBuyPrice,
-  quantity
+  quantity,
 }) => {
   const client = await pool.connect();
 
   try {
-    await client.query("BEGIN"); // begin transaction
+    await client.query('BEGIN'); // begin transaction
 
-    let { rows: tradeData } = await client.query(...getTradeQuery(tradeId, portfolioId)); // get the trade for update
-    tradeData = tradeData[0];
+    const { rows: [tradeData] } = await client
+      .query(...getTradeQuery(tradeId, portfolioId)); // get the trade for update
     if (!tradeData) {
-      client.query("ROLLBACK");
+      client.query('ROLLBACK');
       throw new Error("Trade doesn't exist");
     }
 
     const newTradeObj = { // create updated trade obj
       ...(tradeType !== tradeData.trade_type && { tradeType }),
       ...(currentBuyPrice !== tradeData.current_buy_price && { currentBuyPrice }),
-      ...(quantity !== tradeData.quantity && { quantity })
+      ...(quantity !== tradeData.quantity && { quantity }),
     };
 
     const updateTradeQuery = `
       UPDATE trades
-      SET ${newTradeObj.tradeType ? `trade_type = '${newTradeObj.tradeType}', ` : ""}
-      ${newTradeObj.currentBuyPrice ? `current_buy_price = ${newTradeObj.currentBuyPrice}, ` : ""}
-      ${newTradeObj.quantity ? `quantity = ${newTradeObj.quantity}, ` : ""}
+      SET ${newTradeObj.tradeType ? `trade_type = '${newTradeObj.tradeType}', ` : ''}
+      ${newTradeObj.currentBuyPrice ? `current_buy_price = ${newTradeObj.currentBuyPrice}, ` : ''}
+      ${newTradeObj.quantity ? `quantity = ${newTradeObj.quantity}, ` : ''}
       updated_at = CURRENT_TIMESTAMP
       WHERE id = $1 AND portfolio_id = $2;
     `;
@@ -271,8 +293,8 @@ TRADE.SQLUpdateTrade = async ({
 
     await client.query(updateTradeQuery, updateTradeValues); // update the trade
 
-    let { rows: securityData } = await client.query(...getSecurityQuery(portfolioId, tradeData.ticker_symbol)); // get security to update
-    securityData = securityData[0];
+    const { rows: [securityData] } = await client
+      .query(...getSecurityQuery(portfolioId, tradeData.ticker_symbol)); // get security to update
 
     const updatedAveragePrice = revertPrice({ // revert the trade to old price
       tradePrice: tradeData.current_buy_price,
@@ -280,17 +302,19 @@ TRADE.SQLUpdateTrade = async ({
       avgBuyPrice: securityData.average_buy_price,
       shareQuantity: securityData.shares,
       prevPrice: tradeData.previous_avg_buy,
-      tradeType: tradeData.trade_type
+      tradeType: tradeData.trade_type,
     });
 
     const newAverageBuyPriceParam = {
-      newPrice: typeof newTradeObj.currentBuyPrice === "number" ? newTradeObj.currentBuyPrice : tradeData.current_buy_price,
-      newPriceQuantity: typeof newTradeObj.quantity === "number" ? newTradeObj.quantity : tradeData.quantity,
+      newPrice: typeof newTradeObj.currentBuyPrice === 'number' ? newTradeObj.currentBuyPrice : tradeData.current_buy_price,
+      newPriceQuantity: typeof newTradeObj.quantity === 'number' ? newTradeObj.quantity : tradeData.quantity,
       oldPrice: updatedAveragePrice.price,
       oldPriceQuantity: updatedAveragePrice.quantity,
-      tradeType: newTradeObj.tradeType ? newTradeObj.tradeType : tradeData.trade_type
+      tradeType: newTradeObj.tradeType ? newTradeObj.tradeType : tradeData.trade_type,
     };
-    const updatedSecurity = currentAverageBuyPrice(newAverageBuyPriceParam); // update it as new trade entry
+    const updatedSecurity = currentAverageBuyPrice(
+      newAverageBuyPriceParam,
+    ); // update it as new trade entry
 
     const updateSecurityQuery = `
       UPDATE securities
@@ -300,12 +324,17 @@ TRADE.SQLUpdateTrade = async ({
       WHERE ticker_symbol = $3 AND portfolio_id = $4;
     `;
 
-    const updateSecurityValues = [updatedSecurity.price, updatedSecurity.quantity, tradeData.ticker_symbol, portfolioId];
+    const updateSecurityValues = [
+      updatedSecurity.price,
+      updatedSecurity.quantity,
+      tradeData.ticker_symbol,
+      portfolioId,
+    ];
 
     await client.query(updateSecurityQuery, updateSecurityValues);
-    await client.query("COMMIT");
+    await client.query('COMMIT');
   } catch (error) {
-    await client.query("ROLLBACK");
+    await client.query('ROLLBACK');
     throw error;
   } finally {
     client.release();
@@ -324,6 +353,7 @@ TRADE.SQLGetTradesWithSecurities = async ({ portfolioId }) => {
   `;
   const values = [portfolioId];
 
+  // eslint-disable-next-line no-useless-catch
   try {
     const { rows: trades } = await pool.query(query, values); // get all trades for the security
     return trades;

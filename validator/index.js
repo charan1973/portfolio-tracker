@@ -1,4 +1,5 @@
-const Ajv = require("ajv");
+const Ajv = require('ajv');
+
 const ajv = new Ajv();
 
 const validateSchema = (schema, data) => {
@@ -11,5 +12,5 @@ const validateSchema = (schema, data) => {
 };
 
 module.exports = {
-  validateSchema
+  validateSchema,
 };

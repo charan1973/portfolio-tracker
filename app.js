@@ -1,10 +1,10 @@
 const express = require('express');
-const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-require("./config/database");
-const swaggerUi = require('swagger-ui-express')
+
+const swaggerUi = require('swagger-ui-express');
 const swaggerFile = require('./temp/swagger_output.json');
+require('./config/database');
 
 const indexRouter = require('./app/routes/index');
 
