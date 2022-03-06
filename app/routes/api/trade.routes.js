@@ -1,11 +1,9 @@
 const router = require('express').Router();
 
-const {
-  createTrade,
-  removeTrade,
-  getTrades,
-  updateTrade,
-} = require('../../controller/trade.controller');
+const createTrade = require('../../controller/trade/createTrade.controller');
+const getTrades = require('../../controller/trade/getTrades.controller');
+const updateTrade = require('../../controller/trade/updateTrade.controller');
+const removeTrade = require('../../controller/trade/removeTrade.controller');
 
 router.post('/', createTrade);
 
