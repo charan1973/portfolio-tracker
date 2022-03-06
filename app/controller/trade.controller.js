@@ -1,7 +1,7 @@
 const { SQLGetAllSecurities } = require("../model/securities");
 const { SQLCreateTrade, SQLRemoveTrade, SQLGetTradesWithSecurities, SQLUpdateTrade } = require("../model/trade");
-const { validateSchema } = require("../validator");
-const { createTradeSchema, updateTradeSchema } = require("../validator/schema/trade.schema");
+const { validateSchema } = require("../../validator");
+const { createTradeSchema, updateTradeSchema } = require("../../validator/schema/trade.schema");
 
 const createTrade = async (req, res) => {
   // #swagger.tags = ['Trade']

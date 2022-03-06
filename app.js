@@ -6,7 +6,7 @@ require("./config/database");
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./temp/swagger_output.json');
 
-const indexRouter = require('./routes/index');
+const indexRouter = require('./app/routes/index');
 
 const app = express();
 
