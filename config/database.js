@@ -1,14 +1,10 @@
 const Pool = require('pg-pool');
 const { envVariables } = require(".");
 
-const { db } = envVariables;
+const { db_url } = envVariables;
 
 const pool = new Pool({
-    host: db.host,
-    database: db.name,
-    user: db.user,
-    password: db.password,
-    port: db.port,
+    connectionString: db_url,
     ssl: { rejectUnauthorized: false },
     max: 5,
 });
