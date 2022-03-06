@@ -93,3 +93,10 @@ req.body = {
 - Get returns
 
 `GET /api/portfolio/returns/46e9d384-09e2-4135-9c9d-c024e5567a50`
+
+## **What all can be improved:**
+- Paginating the GET apis
+- Better error handling instead of generic failed message
+- Implementing dependency injection
+- Have service layer for handling business logic so it can be reused if there's need for new protocol
+- Adding db migration tool for easy database migrations
